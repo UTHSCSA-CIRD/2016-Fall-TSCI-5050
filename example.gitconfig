@@ -1,0 +1,16 @@
+[user]
+        email = your_email@yourschool.edu 
+        name = Your Name
+[push]
+        default = matching
+
+[alias]
+        co = checkout
+        ci = commit
+        st = status
+        br = checkout -b
+        mr = merge --no-ff
+        pu = "!git commit -q -a -m \"Autocommit\"; git push -q"
+[color]
+        ui = auto
+
