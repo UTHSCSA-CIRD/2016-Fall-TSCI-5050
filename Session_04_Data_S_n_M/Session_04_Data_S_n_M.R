@@ -14,3 +14,5 @@ print(.tmp<-dbListTables(con));
 #' Let's look at what is contained in `r .tmp[1]` and `r .tmp[2]`.
 head(dbReadTable(con,'io'));
 head(dbReadTable(con,'kc'));
+
+dt <- dbReadTable(con,'kc');
