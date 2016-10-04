@@ -5,13 +5,13 @@
 #' ---
 #+ echo=TRUE,cache=TRUE
 #' Load libraries
-require(RSQLite);require(data.table);require(plyr);require(ggplot2);
+require(RSQLite);require(magrittr);require(data.table);require(plyr);require(ggplot2);
 
 #' Open connection (remember to change the path to match your location)
 con <- dbConnect(SQLite(),'/tmp/2016-Fall-TSCI-5050/Session_04_Data_S_n_M/Session_04_Nour.db');
 #' See tables
 print(.tmp<-dbListTables(con));
-#' Let's look at what is contained in `r .tmp[1]` and `r .tmp[2]`.
+#' Let's look at what is contained in `io` and `kc`.
 head(dbReadTable(con,'io'));
 head(dbReadTable(con,'kc'));
 
@@ -28,11 +28,11 @@ dt[11,1] <- 0;
 #' Now reshape it to the long format
 reshape(dt,idvar='y',v.names='x',varying=list(2:9),direction='long') %>% 
   setNames(c('Dose','Replicate','Signal')) -> dt1;
-#' ...notice the use of the `%>%` pipe operator (from the `plyr` package)
+#' ...notice the use of the `%>%` pipe operator (from the `magrittr` package)
 head(dt1);
 #' Check the data types
 sapply(dt1,class);
-#' Make replicate into a factor to avoid `lm()` and friends from over-interpreting it
+#' Make replicate into a factor to prevent `lm()` and friends from over-interpreting it
 dt1$Replicate<- as.factor(dt1$Replicate);
 #' Now let's try some plots.
 gp <- ggplot(data=dt1,aes(x=Dose,y=Signal));
