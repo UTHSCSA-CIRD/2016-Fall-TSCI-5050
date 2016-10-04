@@ -42,12 +42,22 @@ gp + geom_line(aes(x=log(Dose),y=c(0,diff(Signal)),group=Replicate,colour=Replic
 #' But we need to diff _within_ each replicate. For that we can use `data.table`
 tab1 <- data.table(dt1);
 #' Do a bunch of interesting transformations.
-tab1[,list(Dose,
-           logDose=log(Dose),
-           Signal,
-           DiffSignal=c(0,diff(Signal))
-           ),
-     by=Replicate];
+tab1[,cbind(.SD,                          # In data.table, .SD is the entire set 
+                                          # of rows currently being processed.
+                                          # It itself is also a `data.table`.
+            diffSignal=c(0,diff(Signal)), # Create a new column named 
+                                          # `diffSignal`,the first-order 
+                                          # difference for the Signal (the 
+                                          # inverse of cumsum).
+            logDose=log(Dose)),           # Create a new column named `logDose`,
+                                          # the log of the dose.
+                                          # This concludes the second argument
+                                          # of this data table subscripting 
+                                          # expression.
+     by=Replicate];    # The final argument, `by`, tells `data.table` to do the
+                       # transformations requested by the second argument 
+                       # separately for each `Replicate` 
+                       # (this matters for `diff()`)
 
 #' One last thing: dataset io
 dbReadTable(con,'io') %>% 
