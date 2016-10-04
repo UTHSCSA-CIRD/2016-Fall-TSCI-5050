@@ -5,7 +5,7 @@
 #' ---
 #+ echo=TRUE,cache=TRUE
 #' Load libraries
-require(RSQLite);require(data.table);require(plyr);
+require(RSQLite);require(data.table);require(plyr);require(ggplot2);
 
 #' Open connection (remember to change the path to match your location)
 con <- dbConnect(SQLite(),'/tmp/2016-Fall-TSCI-5050/Session_04_Data_S_n_M/Session_04_Nour.db');
@@ -17,4 +17,25 @@ head(dbReadTable(con,'kc'));
 
 dt <- dbReadTable(con,'kc');
 #' Convert to numeric because for some reason SQLite thinks its not
-dt <- sapply(dt,as.numeric);
+dt[,] <- sapply(dt,as.numeric,simplify = F);
+#' Any missing values?
+is.na(dt);
+#' Apparently `is.numeric()` converts blanks to missing values (`NA`).
+#' Let's check:
+as.numeric(c('1','2.3','4','','13.8'));
+#' Fix it! It happens to be a zero in real life.
+dt[11,1] <- 0;
+#' Now reshape it to the long format
+reshape(dt,idvar='y',v.names='x',varying=list(2:9),direction='long') %>% 
+  setNames(c('Dose','Replicate','Signal')) -> dt1;
+#' ...notice the use of the `%>%` pipe operator (from the `plyr` package)
+head(dt1);
+#' Check the data types
+sapply(dt1,class);
+#' Make replicate into a factor to avoid `lm()` and friends from over-interpreting it
+dt1$Replicate<- as.factor(dt1$Replicate);
+#' Now let's try some plots.
+gp <- ggplot(data=dt1,aes(x=Dose,y=Signal));
+gp + geom_line(aes(group=Replicate,colour=Replicate));
+gp + geom_line(aes(x=log(Dose),group=Replicate,colour=Replicate));
+gp + geom_line(aes(x=log(Dose),y=c(0,diff(Signal)),group=Replicate,colour=Replicate));
