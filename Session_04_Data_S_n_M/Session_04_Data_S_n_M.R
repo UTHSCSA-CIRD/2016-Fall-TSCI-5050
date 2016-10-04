@@ -16,3 +16,5 @@ head(dbReadTable(con,'io'));
 head(dbReadTable(con,'kc'));
 
 dt <- dbReadTable(con,'kc');
+#' Convert to numeric because for some reason SQLite thinks its not
+dt <- sapply(dt,as.numeric);
