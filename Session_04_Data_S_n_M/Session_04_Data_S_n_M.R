@@ -39,3 +39,19 @@ gp <- ggplot(data=dt1,aes(x=Dose,y=Signal));
 gp + geom_line(aes(group=Replicate,colour=Replicate));
 gp + geom_line(aes(x=log(Dose),group=Replicate,colour=Replicate));
 gp + geom_line(aes(x=log(Dose),y=c(0,diff(Signal)),group=Replicate,colour=Replicate));
+#' But we need to diff _within_ each replicate. For that we can use `data.table`
+tab1 <- data.table(dt1);
+#' Do a bunch of interesting transformations.
+tab1[,list(Dose,
+           logDose=log(Dose),
+           Signal,
+           DiffSignal=c(0,diff(Signal))
+           ),
+     by=Replicate];
+
+#' One last thing: dataset io
+dbReadTable(con,'io') %>% 
+  transform(x=as.numeric(x),y=as.numeric(y),z=as.numeric(z)) -> io;
+io$y_x <- with(io,y - x);
+plot(y_x~z,io,pch='.',cex=2,col='#00000060');
+
