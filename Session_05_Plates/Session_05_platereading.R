@@ -60,8 +60,8 @@ dat3$ID <- gsub('^pl([0-9]{1,2}).*','\\1',dat3$repid);
 dat3$treat <- gsub('[^vc]','',dat3$repid);
 dat3$Plate.Location <- dat3$well;
 levels(dat3$Plate.Location) <- gsub('^([A-H])0([0-9])$','\\1\\2',levels(dat3$well));
-dat3$col<-gsub('[^0-9]','',dat4$Plate.Location);
-dat3$row<-gsub('[0-9]','',dat4$Plate.Location);
+dat3$col<-gsub('[^0-9]','',dat3$Plate.Location);
+dat3$row<-gsub('[0-9]','',dat3$Plate.Location);
 
 merge(dat3,transform(map[,c(1:9,13)],Plate.ID=as.character(Plate.ID)),
       by = c('Plate.Location','ID'),all.x=T) %>% 
