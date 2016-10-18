@@ -62,6 +62,7 @@ dat3$Plate.Location <- dat3$well;
 levels(dat3$Plate.Location) <- gsub('^([A-H])0([0-9])$','\\1\\2',levels(dat3$well));
 dat3$col<-gsub('[^0-9]','',dat3$Plate.Location);
 dat3$row<-gsub('[0-9]','',dat3$Plate.Location);
+dat3$nwell <- rep(1:96,length(unique(dat3$repid)));
 
 merge(dat3,transform(map[,c(1:9,13)],Plate.ID=as.character(Plate.ID)),
       by = c('Plate.Location','ID'),all.x=T) %>% 
@@ -73,6 +74,12 @@ dat4[grepl('^[A-H]1$',dat4$Plate.Location),'Symbol'] <- 'Mock';
 
 dat4[is.na(dat4$Symbol),'Symbol']<- 'Control';
 
+split(dat4,dat4$repid) %>% sapply(function(xx) {
+  xx$c1sd <- sd(subset(xx,col==1)$value); 
+  xx$c1ctr <- rep(subset(xx,col==1)$value,each=12);
+  xx$c1med <- median(subset(xx,col==1)$value);
+  xx},simplify=F) %>% do.call('rbind',.) -> dat5;
+
 #' Get a matrix of plate-wise standard deviations
 qc.scale<-sapply(dat,function(xx) 
   sapply(xx,function(yy) 
@@ -83,3 +90,5 @@ qc<-sapply(dat,function(xx)
   sapply(xx,function(yy) 
     mean(apply(yy[,1:11],1,function(zz) zz[-1]-zz[1]))));
 
+#' Long story, will explain later, but this is kind of interesting
+ggplot(transform(subset(dat5,ID!='1'&Symbol!='siPLK'),row=as.numeric(factor(row)),col=as.numeric(col),ID=as.numeric(ID),value=(value-c1med)/c1sd),aes(x=nwell,y=value,color=treat,group=repid))+geom_line()+facet_wrap(~ID);
