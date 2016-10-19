@@ -4,9 +4,12 @@
 #' date: "October 18, 2016"
 #' ---
 
-require('platetools');
-require('xlsx');
-require('magrittr');
+#' Load some libraries we'll be using for this
+require('platetools');  
+require('xlsx');         # also reads xlsm and xls
+require('magrittr');     # provides the %>% operator
+require('nlme');         # mixed-effect models
+require('ggplot2');
 
 #' Declare session variables
 pmfile <- 'MI00200 MISSION microRNA Mimic v.17 Plate Map.xls';
@@ -82,4 +85,13 @@ qc.scale<-sapply(dat,function(xx)
 qc<-sapply(dat,function(xx) 
   sapply(xx,function(yy) 
     mean(apply(yy[,1:11],1,function(zz) zz[-1]-zz[1]))));
+
+#' Mixed effects as alternative to manual normalization. The idea is you fit an
+#' `lme` model and then treat the _residuals_ as your response variable without 
+#' further normalization
+fit <- lme(value~treat,dat5<-subset(dat4,!Symbol%in%c('Mock','siPLK','Control')),random=~1|ID/repid/col);
+summary(fit);
+plot(fit,level=3);
+dat5$norm<-residuals(fit,level=3);
+ggplot(dat5,aes(x=Symbol,y=norm,col=treat))+geom_boxplot();
 
