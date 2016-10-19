@@ -49,7 +49,7 @@ unplate <- function(dat,plate=96) {
         setNames(rep(paste0(c('c','c','c','v','v','v'),1:6)));
       # End inner pipeline 
     }) %>% 
-  setNames(paste0('pl',gsub('.*([0-9]{1,2}) series.xlsm$','\\1',filenames))) -> dat;
+  setNames(paste0('pl',gsub('.*//([0-9]{1,2}) series.xlsm$','\\1',filenames))) -> dat;
 
 do.call('c',dat) %>% sapply(unplate,simplify=F) -> dat2;
 
@@ -96,11 +96,12 @@ qc<-sapply(dat,function(xx)
 #' Mixed effects as alternative to manual normalization. The idea is you fit an
 #' `lme` model and then treat the _residuals_ as your response variable without 
 #' further normalization
-fit <- lme(value~treat,dat5<-subset(dat4,!Symbol%in%c('Mock','siPLK','Control')),random=~1|ID/repid/col);
+fit <- lme(value~treat,dat6<-subset(dat5,!Symbol%in%c('Mock','siPLK','Control')),
+           random=~1|ID/repid/col);
 summary(fit);
 plot(fit,level=3);
-dat5$norm<-residuals(fit,level=3);
-ggplot(dat5,aes(x=Symbol,y=norm,col=treat))+geom_boxplot();
+dat6$norm<-residuals(fit,level=3);
+#ggplot(dat6,aes(x=Symbol,y=norm,col=treat))+geom_boxplot();
 
 #' Long story, will explain later, but this is kind of interesting
-ggplot(transform(subset(dat5,ID!='1'&Symbol!='siPLK'),row=as.numeric(factor(row)),col=as.numeric(col),ID=as.numeric(ID),value=(value-c1med)/c1sd),aes(x=nwell,y=value,color=treat,group=repid))+geom_line()+facet_wrap(~ID);
+#ggplot(transform(subset(dat5,ID!='1'&Symbol!='siPLK'),row=as.numeric(factor(row)),col=as.numeric(col),ID=as.numeric(ID),value=(value-c1med)/c1sd),aes(x=nwell,y=value,color=treat,group=repid))+geom_line()+facet_wrap(~ID);
