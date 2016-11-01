@@ -102,8 +102,12 @@ dat7 <- groupedData(value~treat|ID,dat6);
 fit0 <- lme(value~treat,dat7,random=pdBlocked(list(pdIdent(~1),pdIdent(~row-1),pdIdent(~col-1))));
 summary(fit);
 plot(fit,level=3);
-dat6$norm<-residuals(fit,level=3);
+dat6$norm<-residuals(fit,level=3,type = 'pearson');
 #ggplot(dat6,aes(x=Symbol,y=norm,col=treat))+geom_boxplot();
 
 #' Long story, will explain later, but this is kind of interesting
 #ggplot(transform(subset(dat5,ID!='1'&Symbol!='siPLK'),row=as.numeric(factor(row)),col=as.numeric(col),ID=as.numeric(ID),value=(value-c1med)/c1sd),aes(x=nwell,y=value,color=treat,group=repid))+geom_line()+facet_wrap(~ID);
+
+samplePlot <- function(data,val='norm',col='treat',pch='.',...){
+  plot(data[[val]],col=factor(data[[col]]),pch=pch,...);
+}
