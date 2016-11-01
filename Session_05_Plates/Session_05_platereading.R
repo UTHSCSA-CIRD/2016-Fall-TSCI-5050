@@ -98,6 +98,8 @@ qc<-sapply(dat,function(xx)
 #' further normalization
 fit <- lme(value~treat,dat6<-subset(dat5,!Symbol%in%c('Mock','siPLK','Control')),
            random=~1|ID/repid/col);
+dat7 <- groupedData(value~treat|ID,dat6);
+fit0 <- lme(value~treat,dat7,random=pdBlocked(list(pdIdent(~1),pdIdent(~row-1),pdIdent(~col-1))));
 summary(fit);
 plot(fit,level=3);
 dat6$norm<-residuals(fit,level=3);
