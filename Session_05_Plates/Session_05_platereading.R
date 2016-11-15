@@ -152,3 +152,8 @@ split(zdat,zdat$playe..) %>% lapply(function(xx) rep(median(subset(xx,name%in%c(
 #' Wow, look at the difference.
 pfr <- update(pf,.-radj~.);
 plot(pfr,zdat,pch='.',col=rainbow(12)[playe..],cex=5);
+#' The new cutoff is going to be the old one (0.7) minus the median
+#' of the `Ratio` value for all the control samples accross ALL plates
+cutoffs <- c(0.7,.9) - median(subset(zdat,name%in%c('ath-miR416','cel-miR-243'))$Ratio);
+#' The z.score cutoff has not changed
+abline(h=cutoffs,v=c(-1,1),lty=2,col='blue');
