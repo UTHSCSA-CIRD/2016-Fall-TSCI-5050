@@ -111,3 +111,27 @@ dat6$norm<-residuals(fit,level=3,type = 'pearson');
 samplePlot <- function(data,val='norm',col='treat',pch='.',...){
   plot(data[[val]],col=factor(data[[col]]),pch=pch,...);
 }
+
+#' ## New topic! Regression (for really weird reasons)
+#' 
+#' Read in new data.
+zdat <- read.csv(paste0(datapath,'ratio and z score.csv'));
+#' This contains physical plates as columns, plate-IDs and 
+#' wells as rows. Also well-wise averages for control and
+#' vincristine replicate-sets, called `avg` and `avg.1`.
+#' Let's calculate the product and ratio of these for each
+#' miRNA and name those columns `VC` and `V_C`, respectively.
+#' Yes, sounds crazy, just go with it.
+zdat$VC <- with(zdat,avg.1*avg);
+zdat$V_C <- with(zdat,avg.1/avg);
+#' Now let's fit a linear regression model to them
+VClm <- lm(VC~0+V_C,zdat);
+#' Now let's extract the residuals from this model and add
+#' them to our dataset as a new variable, `tox`
+zdat$tox <- resid(VClm);
+#' Now lets rank them, again new column
+zdat$ranktox <- order(zdat$tox,decreasing = F);
+#' Prediction-- if you plot your data as you usually
+#' do, and then color in the points in order of increasing 
+#' toxicity (i.e. from 1 to 962) you will see points getting
+#' filled in from the lower-left quadrant first.
