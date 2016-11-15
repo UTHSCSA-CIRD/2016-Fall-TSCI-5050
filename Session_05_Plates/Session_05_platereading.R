@@ -116,6 +116,7 @@ samplePlot <- function(data,val='norm',col='treat',pch='.',...){
 #' 
 #' Read in new data.
 zdat <- read.csv(paste0(datapath,'ratio and z score.csv'));
+zdat <- zdat[1:962];
 #' This contains physical plates as columns, plate-IDs and 
 #' wells as rows. Also well-wise averages for control and
 #' vincristine replicate-sets, called `avg` and `avg.1`.
@@ -135,3 +136,19 @@ zdat$ranktox <- order(zdat$tox,decreasing = F);
 #' do, and then color in the points in order of increasing 
 #' toxicity (i.e. from 1 to 962) you will see points getting
 #' filled in from the lower-left quadrant first.
+#' 
+#' So save typing, let's first create a formula on which to plot
+pf <- Ratio~z.score.vcr;
+#' Here is the usual plot...
+plot(pf,zdat,pch='.',col='#00000040',cex=5);
+points(pf,zdat,subset=name%in%c('ath-miR416','cel-miR-243'),pch='.',col='purple',cex=5);
+abline(h=c(.7,.9),v=c(-1,1),lty=2,col='blue');
+#' Here is the usual plot colored by plate
+plot(pf,zdat,pch='.',col=rainbow(12)[playe..],cex=5);
+#' We noticed that there was a plate-wise offset in the Ratio. So here
+#' are adjustments to the ratio obtained by taking the median of the
+#' ratios of the two controls on each plate
+split(zdat,zdat$playe..) %>% lapply(function(xx) rep(median(subset(xx,name%in%c('ath-miR416','cel-miR-243'))$Ratio),nrow(xx))) %>% unsplit(zdat$playe..) -> zdat$radj;
+#' Wow, look at the difference.
+pfr <- update(pf,.-radj~.);
+plot(pfr,zdat,pch='.',col=rainbow(12)[playe..],cex=5);
