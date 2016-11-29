@@ -34,4 +34,11 @@ summary(lm0)$coefficient;
 #' gives the same result a t-test
 t.test(conc~fDs,ragdata);
 #' ...not significant, in both cases.
+#' How about if we add `fWt` (low/high) as a predictor...
+#' We can use the `update` function to avoid retyping the whole model
+lm1 <- update(lm0,.~.+fWt);
+summary(lm1);
+#' Still insignificant.
+#' How about if weight is the only predictor?
+lm2 <- update(lm0,.~fWt);
 
