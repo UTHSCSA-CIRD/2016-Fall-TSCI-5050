@@ -3,6 +3,12 @@
 #' author: "Nour Abdelfattah"
 #' date: "November 29, 2016"
 #' ---
+.workdir <- 'Session_06_Regression';
+if(basename(getwd())!=.workdir){
+  if(.workdir %in% list.files('.')) setwd(.workdir) else
+    if(.workdir %in% list.files('..')) setwd(file.path('..',.workdir)) else
+      setwd(file.path('..','..',.workdir))
+}
 
 #' Load the usual goodies
 library(magrittr);
@@ -148,3 +154,36 @@ summary(update(lm6,data=transform(ragdata,Dose=Dose-3.1,Wt=Wt-median(Wt))));
 #' * Taking into account that we have multiple individuals being measured over time, not just one, meaning that they might have random individual variation in slope and intercept.
 #' * Having discrete and continuous variables in the same model.
 #' * Maybe: transforming `conc` to make the data behave like cell counts in the context of multi-drug synergy and then trying either `lme()` with a function of `conc` or `nlme()`
+
+#' # Session 7!
+#' Make a durable version of our increasingly transformed `data.frame`
+transform(ragdata,Dose = Dose - 3.1,Wt = Wt - median(Wt)) %>% 
+  subset(Time > 3) -> ragdata0;
+ragdata1 <- ragdata0[order(ragdata0$Time),];
+
+#' # How to do confidence intervals on a fitted model
+cbind(confint(lm6),summary(lm6)$coef[,1])[,c(1,3,2)];
+#' Breaking it down:
+ 
+# bind the columns these two functions give you into one convenient matrix
+cbind(
+  # this produces the lower and upper confidence bounds
+  # giving 90% confidence bounds to demonstrate how to change from the
+  # default 95%
+  confint(lm6,level = 0.9),
+  # the summary of lm6 returns an object like everything in R almost
+  # which has a subobject called coefficients, which we can extract in
+  # the same command... and that object is a matrix, whose first column
+  # are the effect estimates from our model, so we extract that with [,1]
+  summary(lm6)$coef[,1]
+  # but the resulting 3-column matrix might be less convenient than
+  # lower/estimate/upper form, so we rearrange it with [,c(1,3,2)]
+)[,c(1,3,2)] -> lm6confint;
+
+#' If we transformed the response variable, e.g. with `log()` (which we 
+#' didn't, but for illustrative purposes.. ) we can back-transform this 
+#' entire matrix back to linear scale with `exp()`
+
+exp(lm6confint);
+
+#' TODO: insert exploration up to this point
