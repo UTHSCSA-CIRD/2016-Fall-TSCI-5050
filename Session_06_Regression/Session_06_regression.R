@@ -277,20 +277,12 @@ plot(innlm1);
 #' treatments do. You can tell by coloring the dots
 #' on a plot of the original data:
 plot(count~t,getData(innlm1));
-#' Note the use of the `getData()` command. Instead of
-#' trying to recreate and properly align the original data
-#' with the subset used in the `innlm1` model, it extracts
-#' the actual data-set that the model has been fitted to and
-#' is retained within the model object.
-#' 
-#' Now let's color the dots for which the predicted values 
-#' are in the 45-55 range
 points(
   # same formula-style first argument for plot as before
   count~t,
   # same accessing of the data except now we subset it
   getData(innlm1)[
-    # which tells us which predicted values return true for 
+    # which tells us which predicted values return true for
     # the expression in its argument
     which(
       # the expression is:
@@ -307,6 +299,15 @@ points(
       ),],
   # specify a color to distinguish these points from the rest
   col='green');
+#' Note the use of the `getData()` command. Instead of
+#' trying to recreate and properly align the original data
+#' with the subset used in the `innlm1` model, it extracts
+#' the actual data-set that the model has been fitted to and
+#' is retained within the model object.
+#' 
+#' Now let's color the dots for which the predicted values 
+#' are in the 45-55 range
+#' 
 #' So, you could spend your time learning how to write a modified
 #' `SSlogis()` function. Or you could ask yourself, does it matter?
 #' I would aruge that the imperfect fit of the `urna` group does not
@@ -318,5 +319,46 @@ points(
 #' Here are the hypothesis tests for the nonlinear model.
 #' (in a regular `lm()` this would be `summary(foo)$coef` 
 #' but this is nlme/lme):
-summary(innlm1)$tTest
+summary(innlm1)$tTable;
 #' The heck does this mean? To be continued...
+#'
+#' `Asym.(Intercept)` : asymptote, i.e. the height of the "plateau" of the 
+#' scramble group. Significantly different from 0, which is not surprising or
+#' useful.
+#' 
+#' `Asym.groupsirna1, Asym.groupsirna2, Asym.groupsurna` : the difference of each
+#' of the plateaus for iRNA-1, iRNA-2, and micro-RNA respectively from that of the
+#' scrambled reference group.
+#' 
+#' `xmid.(Intercept)`: the time (x-axis) corresponding to the midpoint between 
+#' `Asym.(Intercept)` and 0 on the y-axis. I.e. the inflection point.
+#' 
+#' `xmid.groupsirna1, xmid.groupsirna2, xmid.groupsurna` : the difference between
+#' the `xmid` for each of these treatment groups and `xmid.(Intercept)`, as above.
+#' All significantly differ from the reference group except iRNA-1.
+#' 
+#' `scal.(Intercept)`: the distance on the x-axis between `xmid.(Intercept)` and 
+#' and the point corresponding to approximately `0.73*Asym.(Intercept)` (or exactly
+#' corresponding to `1/(1+exp(-1)))`). This parameter roughly corresponds to the 
+#' initial slope.
+#' 
+#' `scal.groupsirna1, scal.groupsirna2, scal.groupsurna` : differences from the
+#' `scal.(Intercept)`, as above. All significantly different except iRNA-1.
+#' 
+#' But, let's look at the big picture. You are trying to show that a) your iRNAs
+#' do change the growth curves downward. You have shown this. You are also trying
+#' to show that your micro-RNA changes the growth curves downward even more. You
+#' have also shown this. In fact, you would have successfully shown this if there
+#' was a different in just one of the parameters, and for most of them
+#' you have shown a difference in all three!
+#' 
+#' For the micro-RNA the difference is even larger because instead of just halting
+#' proliferation, it actually starts to diminish the cell count, but the logistic
+#' model does not have a parameter for detecting that effect, so if takes
+#' the average height of the plateau phase.
+#'
+#' ...or you can go even simpler: pick a time-point that is in the plateau
+#' phase of every treatment group and do a two-group, N=6 comparison of `sirna1`
+#' (the most toxic of the siRNAs) versus `urna`. You have thoroughly demonstrated
+#' that `sirna1` is in fact toxic relative to `scramble` and `sirna2`. If `urna` is more toxic
+#' than `sirna1` then it is automatically more toxic than the other two.
